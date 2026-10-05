@@ -7,7 +7,6 @@ import {
 } from "react-router-dom";
 
 import ProductDetail from "./pages/ProductDetail";
-
 import Cart from "./pages/Cart";
 
 import "./App.css";
@@ -30,9 +29,7 @@ function Home() {
         </nav>
       </header>
 
-
       <main>
-
         <section className="hero">
 
           <h2>
@@ -52,9 +49,7 @@ function Home() {
           </Link>
 
         </section>
-
       </main>
-
 
       <footer>
         <p>© 2026 Laptop Shop</p>
@@ -129,19 +124,9 @@ function Products({ onAddToCart }) {
         <h1>LAPTOP SHOP</h1>
 
         <nav>
-
-          <Link to="/">
-            Trang chủ
-          </Link>
-
-          <Link to="/products">
-            Sản phẩm
-          </Link>
-
-          <Link to="/cart">
-            Giỏ hàng
-          </Link>
-
+          <Link to="/">Trang chủ</Link>
+          <Link to="/products">Sản phẩm</Link>
+          <Link to="/cart">Giỏ hàng</Link>
         </nav>
 
       </header>
@@ -152,7 +137,6 @@ function Products({ onAddToCart }) {
         <section className="products-section">
 
           <h2>Danh sách sản phẩm</h2>
-
 
           <div className="product-grid">
 
@@ -225,12 +209,7 @@ function Products({ onAddToCart }) {
 
 
                   <p className="price">
-
-                    {product.price.toLocaleString(
-                      "vi-VN"
-                    )}{" "}
-                    VNĐ
-
+                    {product.price.toLocaleString("vi-VN")} VNĐ
                   </p>
 
 
@@ -242,27 +221,8 @@ function Products({ onAddToCart }) {
                   </Link>
 
 
-                  <button 
-                    onClick={() => {
-    const cart = JSON.parse(localStorage.getItem("cart")) || [];
-
-    const existingProduct = cart.find(
-      (item) => item.id === product.id
-    );
-
-    if (existingProduct) {
-      existingProduct.quantity += 1;
-    } else {
-      cart.push({
-        ...product,
-        quantity: 1
-      });
-    }
-
-    localStorage.setItem("cart", JSON.stringify(cart));
-
-    alert("Đã thêm sản phẩm vào giỏ hàng!");
-  }}
+                  <button
+                    onClick={() => onAddToCart(product)}
                   >
                     Thêm vào giỏ hàng
                   </button>
@@ -289,60 +249,54 @@ function Products({ onAddToCart }) {
 }
 
 
-
-
 // =========================
 // APP
 // =========================
 function App() {
 
-  // Danh sách sản phẩm trong giỏ hàng
+  // =========================
+  // GIỎ HÀNG
+  // =========================
   const [cart, setCart] = useState([]);
 
 
   // =========================
-  // THÊM VÀO GIỎ HÀNG
+  // THÊM SẢN PHẨM
   // =========================
   const addToCart = (product) => {
 
     setCart((currentCart) => {
 
-      const existingProduct =
-        currentCart.find(
-          (item) => item.id === product.id
-        );
+      const existingProduct = currentCart.find(
+        (item) => item.id === product.id
+      );
 
 
-      // Nếu sản phẩm đã có
       if (existingProduct) {
 
         return currentCart.map((item) =>
-
           item.id === product.id
-
             ? {
                 ...item,
-                quantity: item.quantity + 1,
+                cartQuantity: item.cartQuantity + 1,
               }
-
             : item
-
         );
 
       }
 
 
-      // Nếu sản phẩm chưa có
       return [
         ...currentCart,
         {
           ...product,
-          quantity: 1,
+          cartQuantity: 1,
         },
       ];
 
     });
 
+    alert("Đã thêm sản phẩm vào giỏ hàng!");
   };
 
 
@@ -352,20 +306,14 @@ function App() {
   const increaseQuantity = (id) => {
 
     setCart((currentCart) =>
-
       currentCart.map((item) =>
-
         item.id === id
-
           ? {
               ...item,
-              quantity: item.quantity + 1,
+              cartQuantity: item.cartQuantity + 1,
             }
-
           : item
-
       )
-
     );
 
   };
@@ -377,40 +325,30 @@ function App() {
   const decreaseQuantity = (id) => {
 
     setCart((currentCart) =>
-
       currentCart
         .map((item) =>
-
           item.id === id
-
             ? {
                 ...item,
-                quantity: item.quantity - 1,
+                cartQuantity: item.cartQuantity - 1,
               }
-
             : item
-
         )
-        .filter(
-          (item) => item.quantity > 0
-        )
-
+        .filter((item) => item.cartQuantity > 0)
     );
 
   };
 
 
   // =========================
-  // XÓA KHỎI GIỎ
+  // XÓA SẢN PHẨM
   // =========================
   const removeFromCart = (id) => {
 
     setCart((currentCart) =>
-
       currentCart.filter(
         (item) => item.id !== id
       )
-
     );
 
   };
@@ -453,9 +391,9 @@ function App() {
           element={
             <Cart
               cart={cart}
-              onIncrease={increaseQuantity}
-              onDecrease={decreaseQuantity}
-              onRemove={removeFromCart}
+              increaseQuantity={increaseQuantity}
+              decreaseQuantity={decreaseQuantity}
+              removeFromCart={removeFromCart}
             />
           }
         />
