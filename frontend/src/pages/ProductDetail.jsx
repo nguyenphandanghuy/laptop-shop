@@ -1,18 +1,17 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 
-function ProductDetail() {
+function ProductDetail({ onAddToCart }) {
   const { id } = useParams();
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
 
   useEffect(() => {
     fetch(`http://localhost:5000/api/products/${id}`)
       .then((response) => {
         if (!response.ok) {
-          throw new Error("Cannot fetch product");
+          throw new Error("Không tìm thấy sản phẩm");
         }
 
         return response.json();
@@ -23,114 +22,106 @@ function ProductDetail() {
       })
       .catch((error) => {
         console.error(error);
-        setError("Không thể lấy thông tin sản phẩm");
         setLoading(false);
       });
   }, [id]);
 
   if (loading) {
-    return <h2>Đang tải thông tin sản phẩm...</h2>;
+    return <h2>Đang tải sản phẩm...</h2>;
   }
 
-  if (error) {
+  if (!product) {
     return (
       <div>
-        <h2>{error}</h2>
-
-        <Link to="/products">
-          ← Quay lại danh sách sản phẩm
-        </Link>
+        <h2>Không tìm thấy sản phẩm</h2>
+        <Link to="/">Quay lại trang chủ</Link>
       </div>
     );
   }
 
   return (
     <div className="product-detail">
-
-      <Link to="/products" className="back-button">
-        ← Quay lại danh sách sản phẩm
-      </Link>
+      <Link to="/">← Quay lại</Link>
 
       <div className="detail-container">
-
         <div className="detail-image">
-          <img
-            src={product.image}
-            alt={product.name}
-          />
+          <img src={product.image} alt={product.name} />
         </div>
 
         <div className="detail-info">
-
-          <p className="detail-brand">
-            {product.brand}
-          </p>
-
           <h1>{product.name}</h1>
 
-          <p className="detail-price">
+          <p>
+            <strong>Hãng:</strong> {product.brand}
+          </p>
+
+          <p>
+            <strong>CPU:</strong> {product.cpu}
+          </p>
+
+          <p>
+            <strong>GPU:</strong> {product.gpu}
+          </p>
+
+          <p>
+            <strong>RAM:</strong> {product.ram}
+          </p>
+
+          <p>
+            <strong>SSD:</strong> {product.ssd}
+          </p>
+
+          <p>
+            <strong>Màn hình:</strong> {product.screen}
+          </p>
+
+          <p>
+            <strong>Tần số quét:</strong> {product.refreshRate} Hz
+          </p>
+
+          <p>
+            <strong>Trọng lượng:</strong> {product.weight} kg
+          </p>
+
+          <p>
+            <strong>Danh mục:</strong> {product.category}
+          </p>
+
+          <p>
+            <strong>Số lượng còn:</strong> {product.quantity}
+          </p>
+
+          <p>{product.description}</p>
+
+          <h2 className="price">
             {product.price.toLocaleString("vi-VN")} VNĐ
-          </p>
+          </h2>
 
-          <p className="detail-description">
-            {product.description}
-          </p>
+          <button onClick={() => {
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-          <h2>Thông số kỹ thuật</h2>
+    const existingProduct = cart.find(
+      (item) => item.id === product.id
+    );
 
-          <div className="specification">
+    if (existingProduct) {
+      existingProduct.quantity += 1;
+    } else {
+      cart.push({
+        ...product,
+        quantity: 1
+      });
+    }
 
-            <p>
-              <strong>CPU:</strong> {product.cpu}
-            </p>
+    localStorage.setItem("cart", JSON.stringify(cart));
 
-            <p>
-              <strong>GPU:</strong> {product.gpu}
-            </p>
-
-            <p>
-              <strong>RAM:</strong> {product.ram}
-            </p>
-
-            <p>
-              <strong>SSD:</strong> {product.ssd}
-            </p>
-
-            <p>
-              <strong>Màn hình:</strong> {product.screen}
-            </p>
-
-            <p>
-              <strong>Tần số quét:</strong>{" "}
-              {product.refreshRate} Hz
-            </p>
-
-            <p>
-              <strong>Trọng lượng:</strong>{" "}
-              {product.weight} kg
-            </p>
-
-            <p>
-              <strong>Danh mục:</strong>{" "}
-              {product.category}
-            </p>
-
-            <p>
-              <strong>Số lượng:</strong>{" "}
-              {product.quantity}
-            </p>
-
-          </div>
-
-          <button className="add-cart-button">
-            Thêm vào giỏ hàng
-          </button>
-
+    alert("Đã thêm sản phẩm vào giỏ hàng!");
+  }}>
+  Thêm vào giỏ hàng
+</button>
         </div>
-
       </div>
-
-    </div>
+    </div>  
   );
 }
 
